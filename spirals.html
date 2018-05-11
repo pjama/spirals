@@ -1,0 +1,119 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+        </style>
+    </head>
+    <body>
+        <canvas id="myCanvas" width="1500" height="700"></canvas>
+        <input id="kValue"
+            type="text"
+            value="(1+Math.sqrt(5)) / 2"
+            style="font-size: 2em;"
+            oninput="onChangeInput(this)"
+            onkeypress="onKeyPressInput(this)" />
+        <label for="sliderWindForce">Zoom
+            <input id="sliderWindForce" type="range" min="0.05" max="9.95" step="0.025" value="1.5" oninput="onChangeZoomSlider(this)" />
+        </label>
+        <div id="output" type="text" style="height: 50px; width: 400px;">
+          <!--1.618033988749895-->
+        </div>
+
+        <script>
+            var MAX_POINTS = 50000,
+                X_POS = 350,
+                Y_POS = 400;
+            var zoom = 1.5,
+                k = (1 + Math.sqrt(5)) / 2,
+                dK = 0.0001;
+            var isPrime = getPrimes(MAX_POINTS);
+
+            function drawSpiral(x, y, k, dr) {
+              var canvas = document.getElementById('myCanvas');
+              var context = canvas.getContext('2d');
+              context.clearRect(0, 0, canvas.width, canvas.height);
+
+              var twoPi = 2 * Math.PI;  // hehe
+              var r = 0,
+                  theta = 0,
+                  dTheta = twoPi / k;
+              var numPoints = 1500 / zoom;
+              console.log('numPoints', numPoints);
+              function drawPoint(n, x, y) {
+                  context.beginPath();
+                  context.strokeStyle = isPrime[n] ? 'red' : 'black';
+                  context.fillStyle = isPrime[n] ? 'red' : 'black';
+                  var r = isPrime[n] ? 2 : 1;
+                  context.arc(x, y, r, 0, twoPi, true);     /* void ctx.arc(x, y, radius, startAngle, endAngle [, anticlockwise]);
+                                                             * https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arc */
+                  context.fill();
+                  context.stroke();
+              }
+              for (var i=0; i < numPoints; i++) {
+                  drawPoint(
+                      i+1,
+                      x += r*Math.cos(theta),
+                      y += r*Math.sin(theta)
+                    );
+                  theta += dTheta;
+                  r += dr;
+              }
+            }
+
+            function main() {
+              registerArrowKeyControls();
+              drawSpiral(X_POS, Y_POS, k, zoom);
+
+            }
+            function onChangeInput(ctx) {
+              try {
+                k = eval(ctx.value);
+                if (isFinite(k)) {
+                  drawSpiral(X_POS, Y_POS, k, zoom)
+                }
+              } catch (ex) {
+                console.log(ex);
+              }
+            }
+
+            function onKeyPressInput(ctx) {
+              console.log('onKeyPressInput', ctx)
+            }
+
+            function onChangeZoomSlider(ctx) {
+              zoom = parseFloat(ctx.value);
+              console.log('Zoom: ' + zoom);
+              drawSpiral(X_POS, Y_POS, k, zoom);
+            }
+
+            function registerArrowKeyControls() {
+              function checkKey(e) {
+                  e = e || window.event;
+                  if (e.keyCode == '38') {        // up arrow
+                    k += dK;
+                    drawSpiral(X_POS, Y_POS, k, zoom);
+                  } else if (e.keyCode == '40') { // down arrow
+                    k -= dK;
+                    drawSpiral(X_POS, Y_POS, k, zoom);
+                  }
+              }
+              document.onkeydown = checkKey;
+            }
+
+            function getPrimes(n) {  // Sieve of Eratosthenes
+                var a = Array(n);
+                for (var i=1; i < n; i++) { a[i] = true; }
+                a[1] = false;
+                for (var i=2; i < n; i++) {
+                  for (var j=2*i; j<n; j+=i) { a[j] = false; }
+                }
+                return a;
+            }
+            main();
+        </script>
+    </body>
+</html>

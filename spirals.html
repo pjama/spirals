@@ -29,7 +29,7 @@
                 Y_POS = 400;
             var zoom = 1.5,
                 k = (1 + Math.sqrt(5)) / 2,
-                dK = 0.0001;
+                dK = 0.0000825729202;
             var isPrime = getPrimes(MAX_POINTS);
 
             function drawSpiral(x, y, k, dr) {
@@ -96,9 +96,11 @@
                   if (e.keyCode == '38') {        // up arrow
                     k += dK;
                     drawSpiral(X_POS, Y_POS, k, zoom);
+                    document.querySelector('#kValue').value = k;
                   } else if (e.keyCode == '40') { // down arrow
                     k -= dK;
                     drawSpiral(X_POS, Y_POS, k, zoom);
+                    document.querySelector('#kValue').value = k;
                   }
               }
               document.onkeydown = checkKey;
